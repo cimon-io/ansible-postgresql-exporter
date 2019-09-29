@@ -1,0 +1,54 @@
+---
+- name: Create the postgresql_exporter group
+  group:
+    name: "{{ postgresql_exporter_system_group }}"
+    state: present
+    system: true
+  when: postgresql_exporter_system_group != "root"
+
+- name: Create the postgresql_exporter user
+  user:
+    name: "{{ postgresql_exporter_system_user }}"
+    groups: "{{ postgresql_exporter_system_group }}"
+    append: true
+    shell: /usr/sbin/nologin
+    system: true
+    createhome: false
+  when: postgresql_exporter_system_user != "root"
+
+- name: Download postgresql_exporter binary
+  become: false
+  get_url:
+    url: "https://github.com/wrouesnel/postgres_exporter/releases/download/v{{ postgresql_exporter_version }}/postgres_exporter_v{{ postgresql_exporter_version }}_linux-amd64.tar.gz"
+    dest: "/tmp/postgres_exporter_v{{ postgresql_exporter_version }}_linux-amd64.tar.gz"
+  register: _download_binary
+  until: _download_binary is succeeded
+  retries: 5
+  delay: 2
+  delegate_to: localhost
+  check_mode: false
+
+- name: Unpack postgresql_exporter binary
+  become: false
+  unarchive:
+    src: "/tmp/postgres_exporter_v{{ postgresql_exporter_version }}_linux-amd64.tar.gz"
+    dest: "/tmp"
+    creates: "/tmp/postgres_exporter_v{{ postgresql_exporter_version }}_linux-amd64/postgres_exporter"
+  delegate_to: localhost
+  check_mode: false
+
+- name: Create /usr/local/bin
+  file:
+    path: /usr/local/bin
+    state: directory
+    mode: 0755
+
+- name: Propagate postgresql_exporter binaries
+  copy:
+    src: "/tmp/postgres_exporter_v{{ postgresql_exporter_version }}_linux-amd64/postgres_exporter"
+    dest: "/usr/local/bin/postgres_exporter"
+    mode: 0755
+    owner: root
+    group: root
+  notify: restart postgresql_exporter
+  when: not ansible_check_mode

@@ -1,0 +1,7 @@
+---
+- name: restart postgresql_exporter
+  become: true
+  systemd:
+    daemon_reload: true
+    name: postgresql_exporter
+    state: restarted

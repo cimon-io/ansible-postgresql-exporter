@@ -1,0 +1,12 @@
+---
+- name: Assert usage of systemd as an init system
+  assert:
+    that: ansible_service_mgr == 'systemd'
+    msg: "This role only works with systemd"
+
+- name: Check if postgresql_exporter is installed
+  stat:
+    path: "/usr/local/bin/postgresql_exporter"
+  register: __postgresql_exporter_is_installed
+  tags:
+    - postgresql_exporter_install

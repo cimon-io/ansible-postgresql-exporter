@@ -1,0 +1,30 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Prometheus PostgreSQL Exporter
+After=network-online.target
+StartLimitInterval=0
+
+[Service]
+Type=simple
+User={{ postgresql_exporter_system_user }}
+Group={{ postgresql_exporter_system_group }}
+{% for k, v in postgresql_exporter_env.items() -%}
+Environment={{ k }}={{ v }}
+{% endfor %}
+ExecStart=/usr/local/bin/postgres_exporter
+
+SyslogIdentifier=postgresql_exporter
+Restart=always
+RestartSec=1
+
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+ProtectSystem=strict
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=yes
+
+[Install]
+WantedBy=multi-user.target

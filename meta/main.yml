@@ -1,0 +1,25 @@
+---
+galaxy_info:
+  author: Eugene Ignatov
+  description: install prometheus postgresql exporter
+  license: MIT
+  company: Cimon.io
+  min_ansible_version: 2.6
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - xenial
+    - name: Debian
+      versions:
+        - stretch
+        - buster
+  galaxy_tags:
+    - monitoring
+    - prometheus
+    - exporter
+    - metrics
+    - system
+    - postgresql
+
+dependencies: []
